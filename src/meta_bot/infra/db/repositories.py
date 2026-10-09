@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, text, update
+from sqlalchemy import func, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,6 +68,70 @@ class SqlAlchemyActionRepository(ActionRepository):
         if isinstance(result, CursorResult):
             return result.rowcount > 0
         return False
+
+    async def create_action(
+        self,
+        platform: Platform,
+        kind: SendKind,
+        contact_id: UUID | None,
+        comment_id: UUID | None,
+        body_hash: str,
+        payload_text: str,
+        scheduled_at: datetime,
+        template_id: UUID | None = None,
+        conversation_id: UUID | None = None,
+    ) -> UUID:
+        """Create a new action record with payload and schedule time."""
+        stmt = (
+            insert(ActionModel)
+            .values(
+                platform=platform.value,
+                kind=kind.value,
+                contact_id=contact_id,
+                comment_id=comment_id,
+                conversation_id=conversation_id,
+                template_id=template_id,
+                body_hash=body_hash,
+                payload_text=payload_text,
+                status=ActionStatus.QUEUED.value,
+                scheduled_at=scheduled_at,
+            )
+            .returning(ActionModel.id)
+        )
+        res = await self._session.execute(stmt)
+        return res.scalar_one()
+
+    async def get_action(self, action_id: UUID) -> ActionModel | None:
+        """Retrieve action by ID."""
+        stmt = select(ActionModel).where(ActionModel.id == action_id)
+        res = await self._session.execute(stmt)
+        return res.scalar_one_or_none()
+
+    async def update_action_status(
+        self,
+        action_id: UUID,
+        status: ActionStatus,
+        sent_at: datetime | None = None,
+        external_id: str | None = None,
+        error_code: str | None = None,
+        increment_attempts: bool = False,
+    ) -> None:
+        """Update action lifecycle status and execution metrics."""
+        values: dict[str, Any] = {
+            "status": status.value,
+            "updated_at": func.now(),
+        }
+        if sent_at is not None:
+            values["sent_at"] = sent_at
+        if external_id is not None:
+            values["external_id"] = external_id
+        if error_code is not None:
+            values["error_code"] = error_code
+        if increment_attempts:
+            values["attempts"] = ActionModel.attempts + 1
+
+        stmt = update(ActionModel).where(ActionModel.id == action_id).values(**values)
+        await self._session.execute(stmt)
 
 
 class SqlAlchemyRawEventRepository(RawEventRepository):
@@ -157,6 +221,23 @@ class SqlAlchemyContactRepository(ContactRepositoryPort):
         res = await self._session.execute(stmt)
         row = res.one()
         return (row[0], bool(row[1]))
+
+    async def set_opt_out(
+        self,
+        platform: Platform,
+        external_id: str,
+        opted_out: bool = True,
+    ) -> None:
+        """Update contact opt-out status."""
+        stmt = (
+            update(ContactModel)
+            .where(
+                ContactModel.platform == platform.value,
+                ContactModel.external_id == external_id,
+            )
+            .values(opted_out=opted_out, updated_at=func.now())
+        )
+        await self._session.execute(stmt)
 
 
 class SqlAlchemyCommentRepository(CommentRepositoryPort):

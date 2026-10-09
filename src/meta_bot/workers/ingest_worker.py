@@ -11,7 +11,7 @@ from redis.exceptions import RedisError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from meta_bot.config import Settings, get_settings
-from meta_bot.domain.models import SystemClock
+from meta_bot.domain.models import CommentEvent, SystemClock
 from meta_bot.infra.db.engine import create_engine
 from meta_bot.infra.db.repositories import (
     SqlAlchemyActionRepository,
@@ -28,6 +28,8 @@ from meta_bot.infra.redis.keys import (
     event_queue_key,
 )
 from meta_bot.logging_setup import setup_logging
+from meta_bot.services.comment_flow import CommentFlowService
+from meta_bot.services.decide import CommentDecisionService
 from meta_bot.services.pipeline import EventPipeline
 
 logger = structlog.get_logger(__name__)
@@ -119,6 +121,20 @@ class IngestWorker:
 
                 # Execute pipeline filters
                 decision = await pipeline.process_event(data)
+
+                # If event proceeded and is a comment, run decision & scheduling
+                if decision.kind.value == "PROCEED" and isinstance(
+                    decision.event, CommentEvent
+                ):
+                    comment_flow = CommentFlowService(
+                        decision_service=CommentDecisionService(settings=self.settings),
+                        redis_client=self.redis,
+                        settings=self.settings,
+                        clock=self._clock,
+                    )
+                    await comment_flow.handle_comment(
+                        session=session, event=decision.event
+                    )
 
                 # Update database raw event record
                 raw_repo = SqlAlchemyRawEventRepository(session)

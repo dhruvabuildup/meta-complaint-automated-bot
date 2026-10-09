@@ -56,3 +56,28 @@ def event_processing_queue_key() -> str:
 def dead_letter_queue_key() -> str:
     """Generate key for poison / failed events dead-letter list."""
     return f"{REDIS_KEY_PREFIX}:queue:events:dlq"
+
+
+def circuit_breaker_errors_key() -> str:
+    """Generate key for circuit breaker consecutive error counter."""
+    return f"{REDIS_KEY_PREFIX}:circuit_breaker:consecutive_errors"
+
+
+def circuit_breaker_state_key() -> str:
+    """Generate key for circuit breaker state (open/closed)."""
+    return f"{REDIS_KEY_PREFIX}:circuit_breaker:state"
+
+
+def contact_body_key(contact_id: str, body_hash: str) -> str:
+    """Generate key for tracking identical message hash sent to a contact."""
+    return f"{REDIS_KEY_PREFIX}:guard:contact_body:{contact_id}:{body_hash}"
+
+
+def post_body_key(post_id: str, body_hash: str) -> str:
+    """Generate key for tracking identical public reply hash count on a post."""
+    return f"{REDIS_KEY_PREFIX}:guard:post_body:{post_id}:{body_hash}"
+
+
+def post_last_variant_key(post_id: str) -> str:
+    """Generate key for the last used public reply variant ID on a post."""
+    return f"{REDIS_KEY_PREFIX}:guard:post_last_variant:{post_id}"

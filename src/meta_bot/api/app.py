@@ -15,6 +15,7 @@ from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoin
 from starlette.requests import Request
 
 from meta_bot.adapters.meta.graph_client import GraphClient
+from meta_bot.api.admin import router as admin_router
 from meta_bot.api.deps import get_db_session_dep, get_redis_dep
 from meta_bot.api.webhook import router as webhook_router
 from meta_bot.config import Settings, get_settings
@@ -90,6 +91,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     # Mount routes
     app.include_router(webhook_router)
+    app.include_router(admin_router)
 
     @app.get("/healthz", tags=["Health"], summary="Liveness check")
     async def healthz() -> dict[str, str]:

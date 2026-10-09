@@ -34,9 +34,48 @@ class ConversationState(StrEnum):
     NEW = "NEW"
     BOT = "BOT"
     HUMAN = "HUMAN"
+    HANDED_OFF = "HANDED_OFF"
     QUIET = "QUIET"
     OPTED_OUT = "OPTED_OUT"
     CLOSED = "CLOSED"
+
+
+class GuardReason(StrEnum):
+    """Evaluation reason returned by SendGuard."""
+
+    ALLOWED = "ALLOWED"
+    KILL_SWITCH = "KILL_SWITCH"
+    OUTSIDE_WINDOW = "OUTSIDE_WINDOW"
+    CONTACT_OPTED_OUT = "CONTACT_OPTED_OUT"
+    HOURLY_CAP_REACHED = "HOURLY_CAP_REACHED"
+    DAILY_CAP_REACHED = "DAILY_CAP_REACHED"
+    DUPLICATE_BODY = "DUPLICATE_BODY"
+    MAX_IDENTICAL_PUBLIC_REACHED = "MAX_IDENTICAL_PUBLIC_REACHED"
+    CIRCUIT_BREAKER_OPEN = "CIRCUIT_BREAKER_OPEN"
+
+
+class HandoffReason(StrEnum):
+    """Reason for handing off conversation to a human agent."""
+
+    COMPLAINT = "COMPLAINT"
+    REFUND = "REFUND"
+    ANGER = "ANGER"
+    LEGAL = "LEGAL"
+    PAYMENT = "PAYMENT"
+    SAFETY = "SAFETY"
+    LOW_CONFIDENCE = "LOW_CONFIDENCE"
+    MANUAL = "MANUAL"
+
+
+class IntentGroup(StrEnum):
+    """Categorized intent group for inbound comment text matching."""
+
+    PRICE = "PRICE"
+    LINK = "LINK"
+    LOCATION = "LOCATION"
+    INFO = "INFO"
+    COMPLAINT = "COMPLAINT"
+    GENERAL = "GENERAL"
 
 
 class ActionStatus(StrEnum):

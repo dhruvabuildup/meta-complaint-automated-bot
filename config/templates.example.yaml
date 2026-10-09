@@ -1,0 +1,60 @@
+# Example business templates for Meta comment automation
+# Used by CommentDecisionService or database seeding
+
+version: 1
+
+intents:
+  PRICE:
+    name: "Pricing & Quotation"
+    keywords: ["price", "cost", "how much", "rate", "fee", "pricing", "discount"]
+    public_variants:
+      - "Thanks for your interest! We've sent you a direct message with all pricing details."
+      - "Just sent you a private message with our complete pricing info!"
+      - "We've sent the pricing overview straight to your inbox!"
+      - "Check your DMs! We've shared the details and pricing with you."
+      - "Thanks for asking! We just dropped the pricing details into your inbox."
+    private_message: "Here are our pricing options: standard packages start at $29. View details at https://example.com/pricing."
+
+  LINK:
+    name: "Website & Product Links"
+    keywords: ["link", "website", "url", "order", "buy", "shop", "catalog"]
+    public_variants:
+      - "We've sent the link and order details directly to your inbox!"
+      - "Check your DMs for the direct link!"
+      - "Sent you a private message with the link and catalog!"
+      - "We just sent you the link in your messages. Check your inbox!"
+      - "Direct link sent to your DMs! Let us know if you need any help."
+    private_message: "Here is the official link to browse and order: https://example.com/shop."
+
+  LOCATION:
+    name: "Location & Store Hours"
+    keywords: ["where are you", "location", "address", "city", "store", "visit"]
+    public_variants:
+      - "We've sent our store locations and address directly to your inbox!"
+      - "Check your DMs for our full address and hours!"
+      - "Sent you a message with our address and visit details!"
+      - "We've shared our location details with you in your inbox!"
+      - "Check your messages for our directions and contact info!"
+    private_message: "Our main store is located at 100 Main Street, open Monday-Saturday 9am-6pm."
+
+  INFO:
+    name: "Service Information"
+    keywords: ["info", "information", "details", "hours", "available", "specs"]
+    public_variants:
+      - "Thanks for your question! We've sent all the details to your inbox."
+      - "Just sent you a DM with the full overview and details!"
+      - "Check your inbox! We've shared the requested information with you."
+      - "Sent you a private message with all the details you need!"
+      - "We just sent you the information in your DMs!"
+    private_message: "We provide high-quality services with dedicated support. Learn more at https://example.com/about."
+
+  GENERAL:
+    name: "General Inquiries"
+    keywords: ["nice", "awesome", "interested", "great", "hello", "hi"]
+    public_variants:
+      - "Thank you for reaching out! We've sent you a message in your inbox."
+      - "Thanks for connecting! Check your DMs for a quick message from us."
+      - "We appreciate your comment! Sent you a private message."
+      - "Check your inbox for a quick note from our team!"
+      - "Thanks for your support! We've reached out to your DMs."
+    private_message: "Thanks for reaching out! How can we assist you today?"

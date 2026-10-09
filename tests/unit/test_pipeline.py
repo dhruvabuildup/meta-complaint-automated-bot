@@ -8,7 +8,13 @@ from uuid import UUID, uuid4
 import pytest
 
 from meta_bot.config import Settings
-from meta_bot.domain.enums import DecisionKind, DropReason, Platform
+from meta_bot.domain.enums import (
+    ActionStatus,
+    DecisionKind,
+    DropReason,
+    Platform,
+    SendKind,
+)
 from meta_bot.domain.models import Clock, CommentEvent
 from meta_bot.services.pipeline import EventPipeline
 from meta_bot.services.ports import (
@@ -51,6 +57,17 @@ class FakeContactRepo(ContactRepositoryPort):
             self.contacts[external_id] = uuid4()
         return (self.contacts[external_id], external_id in self.opted_out_ids)
 
+    async def set_opt_out(
+        self,
+        platform: Platform,
+        external_id: str,
+        opted_out: bool = True,
+    ) -> None:
+        if opted_out:
+            self.opted_out_ids.add(external_id)
+        else:
+            self.opted_out_ids.discard(external_id)
+
 
 class FakeCommentRepo(CommentRepositoryPort):
     """In-memory comment repository returning UUIDs."""
@@ -77,12 +94,38 @@ class FakeActionRepo(ActionRepository):
         contact_id: UUID,
         comment_id: UUID,
         body_hash: str,
+        scheduled_at: datetime | None = None,
     ) -> bool:
         async with self._lock:
             if comment_id in self.claimed:
                 return False
             self.claimed.add(comment_id)
             return True
+
+    async def create_action(
+        self,
+        platform: Platform,
+        kind: SendKind,
+        contact_id: UUID | None,
+        comment_id: UUID | None,
+        body_hash: str,
+        payload_text: str,
+        scheduled_at: datetime,
+        template_id: UUID | None = None,
+        conversation_id: UUID | None = None,
+    ) -> UUID:
+        return uuid4()
+
+    async def update_action_status(
+        self,
+        action_id: UUID,
+        status: ActionStatus,
+        sent_at: datetime | None = None,
+        external_id: str | None = None,
+        error_code: str | None = None,
+        increment_attempts: bool = False,
+    ) -> None:
+        pass
 
 
 class FakeClock(Clock):

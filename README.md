@@ -191,6 +191,65 @@ python scripts/simulate_webhook.py --platform instagram --event-type message --t
 
 ---
 
+## Comment Automation & Outbound Flow
+
+Prompt 3 implements the full outbound comment automation pipeline:
+
+```
+Comment Event (PROCEED)
+       │
+       ▼
+Decision Layer (Intent Matching & Safety Check)
+       │
+       ├─► Complaint / Refund / Anger / Legal ──► Handoff to Human (Zero Sends)
+       │
+       └─► Valid Inquiry (Price, Link, Location, Info, General)
+              │
+              ├─► Public Reply (with PUBLIC_REPLY_RATIO, Variant Rotation)
+              │       └─► Jitter Delay (3–12s) ──► Scheduled in Redis ZSET
+              │
+              └─► Private Reply DM (Assistant Disclosure, Info/CTA, Human Link, STOP)
+                      └─► Paced Delay (20–60s) ──► Scheduled in Redis ZSET
+                              │
+                              ▼
+                        Send Worker
+                              │
+                              ▼
+                        Send Guard (Choke Point: 6 Rules)
+                              │
+                              ▼
+                        Meta Graph API (or DEMO_MODE Log)
+```
+
+### Send Guard (The Single Outbound Choke Point)
+Every outbound message is evaluated before dispatch:
+1. **Global Kill Switch**: Halts all sends immediately when active.
+2. **Circuit Breaker**: Trips on $N$ consecutive critical Meta errors (auth/permissions), sets the kill switch, and fires alert hooks.
+3. **Contact Opt-Out**: Blocks all sends if contact opted out.
+4. **Never Initiate (Window Enforcement)**:
+   - Private Reply: Allowed only within 7 days of the comment.
+   - Direct Message: Allowed only within 24 hours of customer's last message.
+5. **Duplicate Message Guard**:
+   - Never sends identical body hash to the same contact twice.
+   - Caps identical public reply text on the same post (`MAX_IDENTICAL_PUBLIC_PER_POST`).
+6. **Rate Caps**: Atomic hourly and daily caps (`MAX_PRIVATE_PER_HOUR`, `MAX_PRIVATE_PER_DAY`). When a cap is hit, actions are **re-scheduled** into the next bucket, not dropped.
+
+### Administration API
+Protected by `ADMIN_TOKEN` (`Authorization: Bearer <token>` or `X-Admin-Token`):
+- `POST /admin/kill-switch`: Toggle kill switch on or off with audit log entry.
+- `GET /admin/status`: Inspect queue depths (sends, events, DLQ), rate limit counters, breaker state, and kill switch flag.
+- `POST /admin/circuit-breaker/reset`: Manually reset tripped circuit breaker to closed state.
+- `GET /admin/actions`: View outbound actions with status filtering.
+- `POST /admin/actions/{id}/retry`: Requeue a failed or skipped action.
+- `POST /admin/actions/{id}/cancel`: Cancel a queued action.
+
+### Starter Templates & Seeding
+Approved business reply variants and core disclosures are defined in:
+- `config/templates.example.yaml`: YAML reference templates.
+- `scripts/seed_templates.py`: CLI script to seed default templates into PostgreSQL.
+
+---
+
 ## Contributing & Code Standards
 
 - **Conventional Commits**: Format commit messages as `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, or `chore:`.

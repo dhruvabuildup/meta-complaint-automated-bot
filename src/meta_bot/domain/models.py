@@ -9,6 +9,9 @@ from meta_bot.domain.enums import (
     ActionStatus,
     DecisionKind,
     DropReason,
+    GuardReason,
+    HandoffReason,
+    IntentGroup,
     Platform,
     SendKind,
 )
@@ -118,11 +121,57 @@ class SendResult(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     action_id: str | None = None
-    status: ActionStatus
+    status: ActionStatus = ActionStatus.SENT
     sent_at: datetime | None = None
     external_id: str | None = None
+    message_id: str | None = None
+    raw_status: str | None = None
     error_code: str | None = None
     error_message: str | None = None
+
+
+class SendContext(BaseModel):
+    """Context required by SendGuard to validate an outbound message."""
+
+    model_config = ConfigDict(frozen=True)
+
+    account_id: str
+    platform: Platform
+    contact_id: str
+    comment_id: str | None = None
+    post_id: str | None = None
+    comment_created_at: datetime | None = None
+    last_user_message_at: datetime | None = None
+    is_opted_out: bool = False
+    send_kind: SendKind
+    body: str
+
+
+class GuardDecision(BaseModel):
+    """Outcome of SendGuard evaluation."""
+
+    model_config = ConfigDict(frozen=True)
+
+    allowed: bool
+    reason: GuardReason
+    retry_after_seconds: int | None = None
+    details: dict[str, str] | None = None
+
+
+class DecisionPlan(BaseModel):
+    """Decision plan produced by the comment decision layer."""
+
+    model_config = ConfigDict(frozen=True)
+
+    comment_id: str
+    platform: Platform
+    intent_group: IntentGroup
+    is_handed_off: bool = False
+    handoff_reason: HandoffReason | None = None
+    public_reply_text: str | None = None
+    private_reply_text: str | None = None
+    template_id: str | None = None
+    metadata: dict[str, str] | None = None
 
 
 class Clock(Protocol):

@@ -124,6 +124,22 @@ class Settings(BaseSettings):
         default=False,
         description="Whether threaded comment replies trigger automated private replies",
     )
+    MAX_IDENTICAL_PUBLIC_PER_POST: int = Field(
+        default=3,
+        description="Maximum times an identical public reply text may be posted to the same post",
+    )
+    CIRCUIT_BREAKER_ERROR_THRESHOLD: int = Field(
+        default=5,
+        description="Number of consecutive critical Meta errors before tripping circuit breaker",
+    )
+    CIRCUIT_BREAKER_RESET_TIMEOUT_SECONDS: int = Field(
+        default=3600,
+        description="Cooldown duration before circuit breaker allows reset",
+    )
+    DEFAULT_HUMAN_CONTACT: str = Field(
+        default="support@example.com",
+        description="Contact information for human agent escalation",
+    )
 
     @field_validator("MAX_PRIVATE_PER_HOUR")
     @classmethod
