@@ -5,7 +5,13 @@ from typing import Protocol
 
 from pydantic import BaseModel, ConfigDict
 
-from meta_bot.domain.enums import ActionStatus, Platform, SendKind
+from meta_bot.domain.enums import (
+    ActionStatus,
+    DecisionKind,
+    DropReason,
+    Platform,
+    SendKind,
+)
 
 
 class CommentId(BaseModel):
@@ -133,3 +139,14 @@ class SystemClock:
     def now(self) -> datetime:
         """Return current UTC datetime."""
         return datetime.now(timezone.utc)
+
+
+class PipelineDecision(BaseModel):
+    """Result of passing an incoming webhook event through the filter pipeline."""
+
+    model_config = ConfigDict(frozen=True)
+
+    kind: DecisionKind
+    event: CommentEvent | MessageEvent | None = None
+    drop_reason: DropReason | None = None
+    details: dict[str, str] | None = None

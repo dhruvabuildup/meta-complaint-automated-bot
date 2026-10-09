@@ -120,6 +120,10 @@ class Settings(BaseSettings):
         default=False,
         description="When true, write calls to Meta are logged instead of executed",
     )
+    ALLOW_REPLIES_TO_REPLIES: bool = Field(
+        default=False,
+        description="Whether threaded comment replies trigger automated private replies",
+    )
 
     @field_validator("MAX_PRIVATE_PER_HOUR")
     @classmethod

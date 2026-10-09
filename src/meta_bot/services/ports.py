@@ -4,6 +4,7 @@ from typing import Any, Protocol
 from uuid import UUID
 
 from meta_bot.domain.enums import EventKind, Platform
+from meta_bot.domain.models import CommentEvent
 
 
 class GraphApi(Protocol):
@@ -69,4 +70,47 @@ class RawEventRepository(Protocol):
 
         Returns True if newly inserted, False if already processed.
         """
+        ...
+
+    async def mark_processed(
+        self,
+        dedupe_key: str,
+        status: str,
+    ) -> None:
+        """Mark a raw event as processed with timestamp and outcome status."""
+        ...
+
+
+class DedupePort(Protocol):
+    """Protocol for atomic deduplication cache."""
+
+    async def set_nx(self, key: str, value: str, ttl_seconds: int = 604800) -> bool:
+        """Atomically set key if not exists with TTL.
+
+        Returns True if key was set (first time seen), False if already existed.
+        """
+        ...
+
+
+class ContactRepositoryPort(Protocol):
+    """Protocol for contact identity profile operations."""
+
+    async def get_or_create_contact(
+        self,
+        platform: Platform,
+        external_id: str,
+        username: str | None = None,
+    ) -> tuple[UUID, bool]:
+        """Find or create contact record.
+
+        Returns (contact_id, opted_out).
+        """
+        ...
+
+
+class CommentRepositoryPort(Protocol):
+    """Protocol for persisting and retrieving comments."""
+
+    async def upsert_comment(self, comment: CommentEvent) -> UUID:
+        """Insert or update comment and return internal database UUID."""
         ...

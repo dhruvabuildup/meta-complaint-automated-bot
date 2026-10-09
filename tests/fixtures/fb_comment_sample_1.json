@@ -1,0 +1,27 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "page",
+  "entry": [
+    {
+      "id": "100000000000001",
+      "time": 1775736300,
+      "changes": [
+        {
+          "field": "feed",
+          "value": {
+            "item": "comment",
+            "verb": "add",
+            "comment_id": "100000000000001_9990001",
+            "post_id": "100000000000001_8880001",
+            "from": {
+              "id": "200000000000001",
+              "name": "Jordan Miller"
+            },
+            "message": "Do you ship internationally?",
+            "created_time": 1775736300
+          }
+        }
+      ]
+    }
+  ]
+}

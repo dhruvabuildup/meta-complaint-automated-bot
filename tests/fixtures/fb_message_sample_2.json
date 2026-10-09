@@ -1,0 +1,26 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "page",
+  "entry": [
+    {
+      "id": "100000000000001",
+      "time": 1775736800,
+      "messaging": [
+        {
+          "sender": {
+            "id": "200000000000001"
+          },
+          "recipient": {
+            "id": "100000000000001"
+          },
+          "timestamp": 1775736800000,
+          "postback": {
+            "title": "Get Started",
+            "payload": "GET_STARTED_CLICKED",
+            "mid": "m_fb_postback_777888"
+          }
+        }
+      ]
+    }
+  ]
+}

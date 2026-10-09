@@ -41,3 +41,18 @@ def send_queue_key() -> str:
 def contact_lock_key(platform: str, contact_id: str) -> str:
     """Generate key for per-contact distributed concurrency lock."""
     return f"{REDIS_KEY_PREFIX}:lock:contact:{platform.lower()}:{contact_id}"
+
+
+def event_queue_key() -> str:
+    """Generate key for inbound webhook ingestion queue."""
+    return f"{REDIS_KEY_PREFIX}:queue:events"
+
+
+def event_processing_queue_key() -> str:
+    """Generate key for in-flight event processing list."""
+    return f"{REDIS_KEY_PREFIX}:queue:events:processing"
+
+
+def dead_letter_queue_key() -> str:
+    """Generate key for poison / failed events dead-letter list."""
+    return f"{REDIS_KEY_PREFIX}:queue:events:dlq"

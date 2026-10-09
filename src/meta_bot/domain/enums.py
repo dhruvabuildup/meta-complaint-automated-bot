@@ -47,3 +47,23 @@ class ActionStatus(StrEnum):
     SKIPPED = "SKIPPED"
     FAILED = "FAILED"
     DEAD = "DEAD"
+
+
+class DecisionKind(StrEnum):
+    """Pipeline filter outcome."""
+
+    PROCEED = "PROCEED"
+    DROP = "DROP"
+
+
+class DropReason(StrEnum):
+    """Reason why an incoming event was filtered out in the pipeline."""
+
+    UNSUPPORTED_EVENT = "UNSUPPORTED_EVENT"
+    EDIT_OR_DELETE = "EDIT_OR_DELETE"
+    OWN_EVENT = "OWN_EVENT"
+    SPAM_OR_PAGE = "SPAM_OR_PAGE"
+    DUPLICATE = "DUPLICATE"
+    THREADED_REPLY_IGNORED = "THREADED_REPLY_IGNORED"
+    PRIVATE_REPLY_ALREADY_CLAIMED = "PRIVATE_REPLY_ALREADY_CLAIMED"
+    CONTACT_OPTED_OUT = "CONTACT_OPTED_OUT"

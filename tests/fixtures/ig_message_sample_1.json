@@ -1,0 +1,25 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "instagram",
+  "entry": [
+    {
+      "id": "17841400000000001",
+      "time": 1775736500,
+      "messaging": [
+        {
+          "sender": {
+            "id": "17841499999999999"
+          },
+          "recipient": {
+            "id": "17841400000000001"
+          },
+          "timestamp": 1775736500000,
+          "message": {
+            "mid": "m_ig_1234567890abcdef",
+            "text": "Hello, I wanted to inquire about custom orders."
+          }
+        }
+      ]
+    }
+  ]
+}

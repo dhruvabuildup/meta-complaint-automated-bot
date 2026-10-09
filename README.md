@@ -152,6 +152,45 @@ make down
 
 ---
 
+## Webhook Pipeline & Simulator
+
+### Incoming Webhook Endpoints
+- **GET `/webhook`**: Meta handshake verification (`hub.mode`, `hub.verify_token`, `hub.challenge`). Returns `200` with challenge text on success, `403` on token mismatch.
+- **POST `/webhook`**: Receives event payloads. Verifies `X-Hub-Signature-256` HMAC-SHA256 signature BEFORE parsing JSON, records raw event to `events_raw`, enqueues to Redis queue `mb:v1:queue:events`, and returns `200` within 200 ms target.
+
+### Pipeline Filter Sequence
+The background worker consumes incoming items and runs 8 filters in strict order:
+1. Supported event kind and not an edit/delete (`verb != edited/remove/hide/deleted`).
+2. Ignore own comments/replies (`author_id != PAGE_ID / IG_ACCOUNT_ID`) and DM echoes.
+3. Ignore comments containing spam or external promotion patterns.
+4. Atomic Redis deduplication (`SET mb:v1:dedupe:... NX EX 604800` for 7 days).
+5. Top-level comment policy gating (replies to replies dropped unless `ALLOW_REPLIES_TO_REPLIES=true`).
+6. Atomic private reply claim in database (guarantees exactly 1 private reply per comment).
+7. Respect contact opt-out (`opted_out` status check).
+8. Persist comment & contact profile; yield `PROCEED` decision for outbound action.
+
+### Webhook Simulator CLI (`scripts/simulate_webhook.py`)
+To test the pipeline locally without waiting for Meta webhook deliveries, use the simulator script:
+
+```bash
+# 1. Simulate an Instagram comment
+python scripts/simulate_webhook.py --platform instagram --text "How much does this cost?"
+
+# 2. Simulate duplicate delivery (tests 7-day atomic Redis deduplication)
+python scripts/simulate_webhook.py --platform instagram --comment-id "c_test_123" --repeat 2
+
+# 3. Simulate invalid HMAC signature (verifies 403 Forbidden rejection)
+python scripts/simulate_webhook.py --bad-signature
+
+# 4. Simulate a Facebook comment
+python scripts/simulate_webhook.py --platform facebook --text "Is size medium in stock?"
+
+# 5. Simulate an Instagram Direct Message
+python scripts/simulate_webhook.py --platform instagram --event-type message --text "Hello"
+```
+
+---
+
 ## Contributing & Code Standards
 
 - **Conventional Commits**: Format commit messages as `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, or `chore:`.

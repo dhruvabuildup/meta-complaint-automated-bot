@@ -1,0 +1,28 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "instagram",
+  "entry": [
+    {
+      "id": "17841400000000001",
+      "time": 1775736200,
+      "changes": [
+        {
+          "field": "comments",
+          "value": {
+            "id": "17849900000000002",
+            "text": "Does it include express delivery?",
+            "parent_id": "17849900000000001",
+            "from": {
+              "id": "17841499999999998",
+              "username": "samantha_shopper"
+            },
+            "media": {
+              "id": "17841488888888888",
+              "media_product_type": "FEED"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

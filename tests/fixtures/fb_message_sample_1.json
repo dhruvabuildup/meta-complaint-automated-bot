@@ -1,0 +1,25 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "page",
+  "entry": [
+    {
+      "id": "100000000000001",
+      "time": 1775736700,
+      "messaging": [
+        {
+          "sender": {
+            "id": "200000000000001"
+          },
+          "recipient": {
+            "id": "100000000000001"
+          },
+          "timestamp": 1775736700000,
+          "message": {
+            "mid": "m_fb_msg_555444333222",
+            "text": "Can I speak to someone about a refund?"
+          }
+        }
+      ]
+    }
+  ]
+}

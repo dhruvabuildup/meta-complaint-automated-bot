@@ -1,0 +1,26 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "instagram",
+  "entry": [
+    {
+      "id": "17841400000000001",
+      "time": 1775736600,
+      "messaging": [
+        {
+          "sender": {
+            "id": "17841400000000001"
+          },
+          "recipient": {
+            "id": "17841499999999999"
+          },
+          "timestamp": 1775736600000,
+          "message": {
+            "mid": "m_ig_echo_9876543210",
+            "is_echo": true,
+            "text": "Thanks for reaching out! We will assist you shortly."
+          }
+        }
+      ]
+    }
+  ]
+}

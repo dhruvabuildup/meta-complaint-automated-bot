@@ -1,0 +1,27 @@
+{
+  "_comment": "sample, replace with real capture from App Dashboard Test button",
+  "object": "instagram",
+  "entry": [
+    {
+      "id": "17841400000000001",
+      "time": 1775736100,
+      "changes": [
+        {
+          "field": "comments",
+          "value": {
+            "id": "17849900000000001",
+            "text": "How much does the starter package cost?",
+            "from": {
+              "id": "17841499999999999",
+              "username": "alex_customer"
+            },
+            "media": {
+              "id": "17841488888888888",
+              "media_product_type": "FEED"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
