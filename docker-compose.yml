@@ -1,0 +1,112 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: meta_bot
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d meta_bot"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: local
+      LOG_LEVEL: INFO
+      APP_ID: "${APP_ID:-123456789012345}"
+      APP_SECRET: "${APP_SECRET:-mock_app_secret_value_for_testing_purposes}"
+      VERIFY_TOKEN: "${VERIFY_TOKEN:-mock_verify_token_value_for_testing}"
+      GRAPH_VERSION: "${GRAPH_VERSION:-v25.0}"
+      GRAPH_BASE_URL: "${GRAPH_BASE_URL:-https://graph.facebook.com}"
+      PAGE_ID: "${PAGE_ID:-100000000000001}"
+      IG_ACCOUNT_ID: "${IG_ACCOUNT_ID:-17841400000000001}"
+      PAGE_ACCESS_TOKEN: "${PAGE_ACCESS_TOKEN:-mock_page_access_token_testing}"
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgrespassword@postgres:5432/meta_bot"
+      REDIS_URL: "redis://redis:6379/0"
+      TOKEN_ENC_KEY: "${TOKEN_ENC_KEY:-MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=}"
+      ADMIN_TOKEN: "${ADMIN_TOKEN:-mock_admin_token_value_for_testing_0}"
+      MAX_PRIVATE_PER_HOUR: "100"
+      MAX_PRIVATE_PER_DAY: "1000"
+      SEND_DELAY_MIN_SECONDS: "20"
+      SEND_DELAY_MAX_SECONDS: "60"
+      PUBLIC_REPLY_RATIO: "0.3"
+      DM_WINDOW_HOURS: "24"
+      PRIVATE_REPLY_WINDOW_DAYS: "7"
+      BOT_REPLY_BUDGET_SECONDS: "20"
+      LLM_TIMEOUT_SECONDS: "12"
+      KILL_SWITCH_DEFAULT: "false"
+      DEMO_MODE: "true"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: ["python", "-m", "meta_bot.workers.main"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      APP_ENV: local
+      LOG_LEVEL: INFO
+      APP_ID: "${APP_ID:-123456789012345}"
+      APP_SECRET: "${APP_SECRET:-mock_app_secret_value_for_testing_purposes}"
+      VERIFY_TOKEN: "${VERIFY_TOKEN:-mock_verify_token_value_for_testing}"
+      GRAPH_VERSION: "${GRAPH_VERSION:-v25.0}"
+      GRAPH_BASE_URL: "${GRAPH_BASE_URL:-https://graph.facebook.com}"
+      PAGE_ID: "${PAGE_ID:-100000000000001}"
+      IG_ACCOUNT_ID: "${IG_ACCOUNT_ID:-17841400000000001}"
+      PAGE_ACCESS_TOKEN: "${PAGE_ACCESS_TOKEN:-mock_page_access_token_testing}"
+      DATABASE_URL: "postgresql+asyncpg://postgres:postgrespassword@postgres:5432/meta_bot"
+      REDIS_URL: "redis://redis:6379/0"
+      TOKEN_ENC_KEY: "${TOKEN_ENC_KEY:-MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDE=}"
+      ADMIN_TOKEN: "${ADMIN_TOKEN:-mock_admin_token_value_for_testing_0}"
+      MAX_PRIVATE_PER_HOUR: "100"
+      MAX_PRIVATE_PER_DAY: "1000"
+      SEND_DELAY_MIN_SECONDS: "20"
+      SEND_DELAY_MAX_SECONDS: "60"
+      PUBLIC_REPLY_RATIO: "0.3"
+      DM_WINDOW_HOURS: "24"
+      PRIVATE_REPLY_WINDOW_DAYS: "7"
+      BOT_REPLY_BUDGET_SECONDS: "20"
+      LLM_TIMEOUT_SECONDS: "12"
+      KILL_SWITCH_DEFAULT: "false"
+      DEMO_MODE: "true"
+
+volumes:
+  postgres_data:
+  redis_data:
