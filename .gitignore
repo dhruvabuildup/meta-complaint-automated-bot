@@ -53,3 +53,7 @@ redis_data/
 *~
 .DS_Store
 Thumbs.db
+
+# Chat and development history exports
+CHAT_HISTORY.md
+*chat_history*.md
